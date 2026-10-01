@@ -112,7 +112,7 @@ h1 { margin: 0; font-family: Georgia, "Noto Serif TC", serif; font-size: clamp(2
 .food-marker.negative { background: var(--negative); }
 
 .leaflet-popup-content-wrapper { border-radius: 16px; box-shadow: var(--shadow); }
-.leaflet-popup-content { width: min(360px, calc(100vw - 64px)) !important; max-height: min(68vh, 650px); overflow-y: auto; margin: 18px; }
+.leaflet-popup-content { width: min(360px, calc(100vw - 72px)) !important; max-height: min(calc(100dvh - 120px), 650px); overflow-y: auto; overscroll-behavior: contain; margin: 18px; }
 .popup-topline { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
 .sentiment-badge { border-radius: 999px; padding: 4px 9px; font-size: .7rem; font-weight: 800; }
 .sentiment-badge.positive { background: var(--positive-soft); color: var(--positive); }
@@ -166,7 +166,7 @@ h1 { margin: 0; font-family: Georgia, "Noto Serif TC", serif; font-size: clamp(2
   .masthead { padding-top: 28px; }
   .controls { top: 46dvh; }
   h1 { font-size: 2.65rem; }
-  .leaflet-popup-content { max-height: 55vh; }
+  .leaflet-popup-content { width: min(360px, calc(100vw - 80px)) !important; max-height: max(150px, calc(46dvh - 105px)); }
 }
 
 @media (prefers-reduced-motion: reduce) {

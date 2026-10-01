@@ -59,7 +59,7 @@
       iconSize: [34, 34], iconAnchor: [17, 31], popupAnchor: [0, -30]
     });
     const marker = L.marker([place.lat, place.lng], { icon, title: place.name }).addTo(map);
-    marker.on("click", () => openPlace(place, marker));
+    marker.on("click", () => centerPlace(place, marker));
     state.markers.set(place.id, marker);
     bounds.extend([place.lat, place.lng]);
   }
@@ -116,9 +116,31 @@
     const place = data.places.find((item) => item.id === id);
     const marker = state.markers.get(id);
     if (!place || !marker) return;
-    map.flyTo([place.lat, place.lng], Math.max(map.getZoom(), 16), { duration: .55 });
-    openPlace(place, marker);
-    if (window.innerWidth <= 760) document.querySelector(".map-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+    centerPlace(place, marker);
+  }
+
+  function centerPlace(place, marker) {
+    if (window.innerWidth <= 760) {
+      document.querySelector(".map-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    const target = L.latLng(place.lat, place.lng);
+    const targetZoom = Math.max(map.getZoom(), 16);
+    const needsMove = map.getCenter().distanceTo(target) > 2 || map.getZoom() !== targetZoom;
+    let popupOpened = false;
+    const showPopup = () => {
+      if (popupOpened) return;
+      popupOpened = true;
+      openPlace(place, marker);
+    };
+
+    if (needsMove) {
+      map.once("moveend", showPopup);
+      map.flyTo(target, targetZoom, { duration: .45 });
+      window.setTimeout(showPopup, 550);
+    } else {
+      showPopup();
+    }
   }
 
   function openPlace(place, marker) {
@@ -133,8 +155,31 @@
     root.querySelector(".address").textContent = place.address || "地址待補";
     root.querySelector(".chat-quote").textContent = place.chatQuote || "";
     root.querySelector(".source-note").textContent = place.sourceNote || "";
-    marker.bindPopup(L.popup({ maxWidth: 400, minWidth: 280, closeButton: true }).setContent(root)).openPopup();
+    const mapWidth = map.getSize().x;
+    const popup = L.popup({
+      maxWidth: Math.min(400, Math.max(240, mapWidth - 40)),
+      minWidth: Math.min(280, Math.max(220, mapWidth - 72)),
+      closeButton: true,
+      autoPan: true,
+      keepInView: true,
+      autoPanPaddingTopLeft: [22, 22],
+      autoPanPaddingBottomRight: [22, 22]
+    }).setContent(root);
+    popup.once("add", () => requestAnimationFrame(() => centerPopup(root)));
+    marker.bindPopup(popup).openPopup();
     bindFeedback(root, place.id);
+  }
+
+  function centerPopup(root) {
+    const popupElement = root.closest(".leaflet-popup");
+    if (!popupElement) return;
+    const mapRect = map.getContainer().getBoundingClientRect();
+    const popupRect = popupElement.getBoundingClientRect();
+    const offsetX = popupRect.left + popupRect.width / 2 - (mapRect.left + mapRect.width / 2);
+    const offsetY = popupRect.top + popupRect.height / 2 - (mapRect.top + mapRect.height / 2);
+    if (Math.abs(offsetX) > 1 || Math.abs(offsetY) > 1) {
+      map.panBy([offsetX, offsetY], { animate: true, duration: .35 });
+    }
   }
 
   function bindFeedback(root, placeId) {
