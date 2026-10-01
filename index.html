@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="成幼共學團 2026 年 10 月 1 日美食討論互動地圖">
+  <title>成幼共學團｜10/1 臺南美食地圖</title>
+  <link rel="preconnect" href="https://tile.openstreetmap.org">
+  <link rel="stylesheet" href="vendor/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <aside class="sidebar" aria-label="店家清單與篩選">
+      <header class="masthead">
+        <p class="eyebrow">成幼共學團 · 2026.10.01</p>
+        <h1>今天吃什麼？</h1>
+        <p class="dek">把群組裡的推薦、踩雷與口袋名單，放回臺南街角。</p>
+        <div class="stats" aria-label="資料摘要">
+          <span><strong id="mapped-count">13</strong> 個已定位</span>
+          <span><strong id="pending-count">7</strong> 個待確認</span>
+        </div>
+        <button id="suggest-place" class="suggest-place" type="button">＋ 推薦新的店家</button>
+      </header>
+
+      <section class="controls" aria-label="搜尋與篩選">
+        <label class="search-field">
+          <span class="sr-only">搜尋店名、餐點或對話內容</span>
+          <input id="search-input" type="search" placeholder="搜尋店名、餐點或對話…" autocomplete="off">
+        </label>
+        <div class="filter-row" role="group" aria-label="依群組觀感篩選">
+          <button class="filter-chip is-active" data-filter="all" type="button">全部</button>
+          <button class="filter-chip" data-filter="positive" type="button">推薦</button>
+          <button class="filter-chip" data-filter="mixed" type="button">討論中</button>
+          <button class="filter-chip" data-filter="negative" type="button">踩雷</button>
+        </div>
+        <div class="legend" aria-label="地圖圖例">
+          <span><i class="dot positive"></i>推薦</span>
+          <span><i class="dot mixed"></i>討論中</span>
+          <span><i class="dot negative"></i>踩雷</span>
+        </div>
+      </section>
+
+      <section class="list-section" aria-labelledby="mapped-title">
+        <div class="section-heading">
+          <h2 id="mapped-title">地圖上的店</h2>
+          <span id="visible-count" aria-live="polite"></span>
+        </div>
+        <div id="place-list" class="place-list"></div>
+      </section>
+
+      <details class="pending-section">
+        <summary>待補位置 <span id="pending-summary-count"></span></summary>
+        <p>對話有提到，但分店或店名不足以唯一定位，因此暫不亂放點位。</p>
+        <div id="pending-list"></div>
+      </details>
+
+      <footer class="sidebar-footer">
+        <p>Google 評分擷取於 2026.10.01，會隨時間變動；點店家可開啟最新 Google Maps。</p>
+        <p>底圖 © OpenStreetMap contributors</p>
+      </footer>
+    </aside>
+
+    <section class="map-panel" aria-label="互動美食地圖">
+      <div id="map"></div>
+      <div id="map-fallback" class="map-fallback" role="alert">
+        <strong>地圖元件尚未載入</strong>
+        <span>請保持網路連線，並雙擊「啟動美食地圖.cmd」透過本機網站開啟。</span>
+      </div>
+      <button id="fit-map" class="map-action" type="button" aria-label="顯示全部店家">顯示全部</button>
+    </section>
+  </main>
+
+  <template id="popup-template">
+    <article class="place-popup">
+      <div class="popup-topline">
+        <span class="sentiment-badge"></span>
+        <span class="category"></span>
+      </div>
+      <h2 class="place-name"></h2>
+      <div class="google-rating"></div>
+      <a class="google-link" target="_blank" rel="noopener noreferrer">查看 Google Maps 與最新評論 ↗</a>
+      <p class="address"></p>
+      <blockquote class="chat-quote"></blockquote>
+      <p class="source-note"></p>
+
+      <section class="community-review" aria-label="使用者意見">
+        <h3>你也這樣覺得嗎？</h3>
+        <div class="vote-row">
+          <button class="vote-button agree" type="button">認同 <span class="agree-count">0</span></button>
+          <button class="vote-button disagree" type="button">不認同 <span class="disagree-count">0</span></button>
+        </div>
+        <form class="review-form">
+          <label>你的名字（必填）<input class="reviewer-name" maxlength="30" required placeholder="例如：小明"></label>
+          <label>群組通關碼（必填）<input class="group-code" type="password" maxlength="40" required autocomplete="off" placeholder="向群組管理者索取"></label>
+          <label>你的評價<textarea class="review-text" maxlength="300" required placeholder="你吃過什麼？喜歡或不喜歡哪裡？"></textarea></label>
+          <button class="submit-review" type="submit">留下具名評價</button>
+          <p class="form-status" role="status"></p>
+        </form>
+        <div class="review-list"></div>
+        <p class="storage-note">投票與留言會具名同步到共用資料庫；同一裝置對同一店家的新投票會取代舊投票。</p>
+      </section>
+    </article>
+  </template>
+
+  <dialog id="suggest-dialog" class="suggest-dialog">
+    <form id="suggest-form" method="dialog">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">共學團口袋名單</p><h2>推薦新的店家</h2></div>
+        <button class="dialog-close" type="button" aria-label="關閉">×</button>
+      </div>
+      <p class="dialog-note">送出後會先進入待審核清單；管理者確認店名與位置後才會顯示在地圖上。</p>
+      <label>你的名字（必填）<input name="displayName" maxlength="30" required></label>
+      <label>群組通關碼（必填）<input name="groupCode" type="password" maxlength="40" required autocomplete="off"></label>
+      <label>店名（必填）<input name="name" maxlength="80" required></label>
+      <label>Google Maps 網址<input name="googleMapsUrl" type="url" maxlength="500" placeholder="https://maps.app.goo.gl/…"></label>
+      <label>類別<input name="category" maxlength="40" placeholder="例如：牛肉湯、咖啡"></label>
+      <label>推薦原因（必填）<textarea name="reason" maxlength="300" required></textarea></label>
+      <div class="dialog-actions"><button class="secondary-button dialog-close" type="button">取消</button><button class="submit-review" type="submit">送出待審核</button></div>
+      <p id="suggest-status" class="form-status" role="status"></p>
+    </form>
+  </dialog>
+
+  <script src="vendor/leaflet.js"></script>
+  <script src="data.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
