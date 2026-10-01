@@ -79,9 +79,12 @@ h1 { margin: 0; font-family: Georgia, "Noto Serif TC", serif; font-size: clamp(2
 .pending-section { margin-top: 24px; border-top: 1px solid var(--line); padding-top: 20px; }
 .pending-section summary { cursor: pointer; font-weight: 800; }
 .pending-section > p { color: var(--muted); font-size: .82rem; line-height: 1.6; }
-.pending-item { padding: 10px 0; border-top: 1px dashed var(--line); }
+.pending-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; align-items: start; padding: 12px 0; border-top: 1px dashed var(--line); }
 .pending-item strong { display: block; font-size: .88rem; }
 .pending-item span { display: block; margin-top: 4px; color: var(--muted); font-size: .76rem; line-height: 1.5; }
+.pending-help { align-self: center; border: 1px solid var(--positive); border-radius: 999px; padding: 6px 10px; background: transparent; color: var(--positive); font-size: .72rem; font-weight: 800; white-space: nowrap; cursor: pointer; }
+.pending-help:hover, .pending-help:focus-visible { background: var(--positive); color: white; outline: none; }
+.pending-empty { margin: 10px 0 0; color: var(--positive); font-size: .82rem; }
 .sidebar-footer { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: .72rem; line-height: 1.55; }
 
 .map-panel { position: relative; min-width: 0; }

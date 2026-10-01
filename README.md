@@ -25,6 +25,8 @@
 
 審核新增店家時，請在 `Suggestions` 補上 `address`、`lat`、`lng`，確認 Google Maps 網址與內容後，把 `status` 改成 `approved`。網站下次載入時就會出現；不採用的紀錄可改成 `hidden` 或 `rejected`，不必刪除。
 
+網站「待確認店家」中的「補充位置」會將原始線索與待確認店名一併送入 `Suggestions`。核准後，網站會依這段來源標記或正式店名自動隱藏相對應的待確認項目，不必另外刪除原始紀錄。
+
 目前群組通關碼請向管理者索取。若要更換，請到 Apps Script 專案「專案設定 → 指令碼屬性」，修改 `GROUP_CODE`；不必修改網站或重新部署。
 
 Apps Script 公開端點只回傳 `approved` 資料。寫入留言、投票或新增店家時必須提供通關碼；通關碼只暫存在使用者該次瀏覽的 `sessionStorage`，不會寫進網站程式碼。

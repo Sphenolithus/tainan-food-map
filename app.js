@@ -41,11 +41,7 @@
     bounds._southWest = bounds._northEast = undefined;
     places.forEach(addMarker);
     document.querySelector("#mapped-count").textContent = places.length;
-    document.querySelector("#pending-count").textContent = data.pending.length;
-    document.querySelector("#pending-summary-count").textContent = `(${data.pending.length})`;
-    document.querySelector("#pending-list").innerHTML = data.pending.map((item) => `
-      <div class="pending-item"><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml(item.reason)}</span></div>
-    `).join("");
+    renderPending();
     render();
     fitAll();
   }
@@ -110,6 +106,40 @@
       <span class="card-meta">${ratingText(place)}</span>
       <span class="card-quote">${escapeHtml(place.chatQuote || "")}</span>
     </button>`;
+  }
+
+  function renderPending() {
+    const pending = data.pending.filter((item) => !isPendingResolved(item));
+    document.querySelector("#pending-count").textContent = pending.length;
+    document.querySelector("#pending-summary-count").textContent = `(${pending.length})`;
+    const list = document.querySelector("#pending-list");
+    list.innerHTML = pending.length ? pending.map((item) => `
+      <div class="pending-item">
+        <div><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml(item.reason)}</span></div>
+        <button class="pending-help" type="button" data-pending-index="${data.pending.indexOf(item)}">補充位置</button>
+      </div>
+    `).join("") : `<p class="pending-empty">目前沒有待確認店家。</p>`;
+    list.querySelectorAll(".pending-help").forEach((button) => button.addEventListener("click", () => {
+      openSuggestionDialog(data.pending[Number(button.dataset.pendingIndex)]);
+    }));
+  }
+
+  function isPendingResolved(pending) {
+    const marker = normalizeName(`補充待確認：${pending.name}`);
+    const aliases = pending.aliases || [pending.name];
+    return data.places.some((place) => {
+      const placeName = normalizeName(place.name);
+      const quote = normalizeName(place.chatQuote || "");
+      if (quote.includes(marker)) return true;
+      return aliases.some((alias) => {
+        const normalizedAlias = normalizeName(alias);
+        return placeName === normalizedAlias || placeName.includes(normalizedAlias);
+      });
+    });
+  }
+
+  function normalizeName(value) {
+    return String(value || "").toLocaleLowerCase("zh-Hant").replace(/[\s\-－—_／/()（）·・]/g, "");
   }
 
   function focusPlace(id) {
@@ -240,11 +270,7 @@
   function setupSuggestionForm() {
     const dialog = document.querySelector("#suggest-dialog");
     const form = document.querySelector("#suggest-form");
-    document.querySelector("#suggest-place").addEventListener("click", () => {
-      form.elements.displayName.value = localStorage.getItem("chengyou-food-map-name") || "";
-      form.elements.groupCode.value = sessionStorage.getItem("chengyou-food-map-code") || "";
-      dialog.showModal();
-    });
+    document.querySelector("#suggest-place").addEventListener("click", () => openSuggestionDialog());
     dialog.querySelectorAll(".dialog-close").forEach(button => button.addEventListener("click", () => dialog.close()));
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -255,13 +281,34 @@
       form.classList.add("is-busy");
       status.textContent = "送出中…";
       try {
+        const pendingSource = form.dataset.pendingSource || "";
+        if (pendingSource) values.reason = `[補充待確認：${pendingSource}] ${values.reason}`;
         const result = await apiPost({ action: "suggestion", ...values });
         if (!result.ok) throw new Error(result.error || "送出失敗");
-        form.reset(); status.textContent = result.message;
+        form.reset(); status.textContent = pendingSource ? "位置補充已送出，待管理者確認後就會上圖。" : result.message;
         setTimeout(() => dialog.close(), 1100);
       } catch (error) { status.textContent = error.message; }
       finally { form.classList.remove("is-busy"); }
     });
+  }
+
+  function openSuggestionDialog(pending) {
+    const dialog = document.querySelector("#suggest-dialog");
+    const form = document.querySelector("#suggest-form");
+    form.reset();
+    form.elements.displayName.value = localStorage.getItem("chengyou-food-map-name") || "";
+    form.elements.groupCode.value = sessionStorage.getItem("chengyou-food-map-code") || "";
+    form.dataset.pendingSource = pending ? pending.name : "";
+    form.elements.name.value = pending ? pending.name : "";
+    form.elements.reason.value = pending ? `原對話線索：${pending.reason}\n補充：` : "";
+    form.elements.googleMapsUrl.required = Boolean(pending);
+    dialog.querySelector("h2").textContent = pending ? "補充待確認店家" : "推薦新的店家";
+    dialog.querySelector(".dialog-note").textContent = pending
+      ? "請貼上確切店家或分店的 Google Maps 網址；送出後由管理者確認，核准上圖時這筆會自動移除。"
+      : "送出後會先進入待審核清單；管理者確認店名與位置後才會顯示在地圖上。";
+    document.querySelector("#suggest-status").textContent = "";
+    dialog.showModal();
+    setTimeout(() => (pending ? form.elements.googleMapsUrl : form.elements.name).focus(), 0);
   }
 
   async function apiPost(payload) {
