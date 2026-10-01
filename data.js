@@ -192,9 +192,99 @@ window.FOOD_MAP_DATA = {
       googleRating: 3.9,
       googleReviews: 1254,
       googleMaps: "https://www.google.com/maps/search/?api=1&query=%E9%98%BF%E5%85%83%E9%BA%B5%E5%BA%97%20%E5%8F%B0%E5%8D%97",
-      chatQuote: "榨菜肉絲麵被點名推薦；對話前段寫成「ㄚ頭麵店」，後段明確寫「阿元麵店」，本圖依後者定位。",
-      sourceNote: "群友 · 11:55、12:34",
-      tags: ["榨菜肉絲麵", "麵店", "長榮路", "店名待複核"]
+      chatQuote: "榨菜肉絲麵被點名推薦；後續對話補充店內硬體已更新、流程尚稱平衡，也增加外送平台。",
+      sourceNote: "群友 · 11:55、12:34；後續對話 · 12:43",
+      tags: ["榨菜肉絲麵", "麵店", "長榮路", "外送平台"]
+    },
+    {
+      id: "guangming-noodles",
+      name: "光明陽春麵",
+      category: "麵店",
+      sentiment: "positive",
+      lat: 22.9970625,
+      lng: 120.2284375,
+      address: "臺南市東區光明街80號",
+      googleRating: 4.4,
+      googleReviews: 545,
+      googleMaps: "https://maps.app.goo.gl/bxSDJY1uMCjup2KS9?g_st=il",
+      chatQuote: "「其實陽春麵那家也不錯，非常明亮乾淨。」",
+      sourceNote: "後續對話 · 12:35–12:36（附 Google 連結）",
+      tags: ["陽春麵", "滷味", "明亮", "乾淨", "小東里"]
+    },
+    {
+      id: "mr-huang-noodles",
+      name: "黃先生麵舖",
+      category: "牛肉麵",
+      sentiment: "positive",
+      lat: 22.9956875,
+      lng: 120.2290625,
+      address: "臺南市東區東平路174號",
+      googleRating: 4.7,
+      googleReviews: 1926,
+      googleMaps: "https://www.google.com/maps/search/?api=1&query=%E9%BB%83%E5%85%88%E7%94%9F%E9%BA%B5%E8%88%96%20%E5%8F%B0%E5%8D%97",
+      chatQuote: "「我們也很常吃黃先生牛肉麵。」",
+      sourceNote: "後續對話 · 12:36",
+      tags: ["牛肉麵", "黃先生麵舖", "東平路", "常吃"]
+    },
+    {
+      id: "shouguo",
+      name: "熟鍋",
+      category: "火鍋",
+      sentiment: "positive",
+      lat: 22.9986875,
+      lng: 120.2295625,
+      address: "臺南市東區東和路30號",
+      googleRating: 4.9,
+      googleReviews: 4397,
+      googleMaps: "https://www.google.com/maps/search/?api=1&query=%E7%86%9F%E9%8D%8B%20%E5%8F%B0%E5%8D%97",
+      chatQuote: "「還有熟鍋。」列入群友常吃名單。",
+      sourceNote: "後續對話 · 12:37",
+      tags: ["火鍋", "個人鍋", "東和路", "常吃"]
+    },
+    {
+      id: "tianfu-noodles",
+      name: "添福麵館（北區長榮店）",
+      category: "麵店",
+      sentiment: "positive",
+      lat: 23.0044375,
+      lng: 120.2224375,
+      address: "臺南市北區長榮路四段73號",
+      googleRating: 4.2,
+      googleReviews: 2381,
+      googleMaps: "https://www.google.com/maps/search/?api=1&query=%E6%B7%BB%E7%A6%8F%E9%BA%B5%E9%A4%A8%20%E5%8F%B0%E5%8D%97%20%E9%95%B7%E6%A6%AE%E8%B7%AF",
+      chatQuote: "換年輕夫妻經營後味道依舊不錯、點餐流程順；待餐動線仍有改善空間，群友也建議增加外送平台。",
+      sourceNote: "後續對話 · 12:43",
+      tags: ["麵店", "長榮路", "點餐流暢", "外送建議"]
+    },
+    {
+      id: "58-lane",
+      name: "五八巷 港式料理 煲仔飯",
+      category: "港式料理／煲仔飯",
+      sentiment: "positive",
+      lat: 23.0045625,
+      lng: 120.2233125,
+      address: "臺南市北區長榮路四段58巷15號",
+      googleRating: 4.5,
+      googleReviews: 295,
+      googleMaps: "https://www.google.com/maps/search/?api=1&query=%E4%BA%94%E5%85%AB%E5%B7%B7%20%E6%B8%AF%E5%BC%8F%E6%96%99%E7%90%86%20%E7%85%B2%E4%BB%94%E9%A3%AF%20%E5%8F%B0%E5%8D%97",
+      chatQuote: "味道經典、座位少；群友補充是以前東豐路樹屋餐廳的老闆過去開的。",
+      sourceNote: "後續對話 · 12:48",
+      tags: ["港式料理", "煲仔飯", "長榮路", "座位少"]
+    },
+    {
+      id: "guoguo-kitchen",
+      name: "郭鍋食堂",
+      category: "義大利麵／燉飯",
+      sentiment: "positive",
+      lat: 23.0048125,
+      lng: 120.2244375,
+      address: "臺南市北區開元路212巷138號",
+      googleRating: 4.6,
+      googleReviews: 357,
+      googleMaps: "https://www.google.com/maps/search/?api=1&query=%E9%83%AD%E9%8D%8B%E9%A3%9F%E5%A0%82%20%E5%8F%B0%E5%8D%97",
+      chatQuote: "巷子往內、快到林森路的義大利麵與燉飯小店，群友說評價也不錯。",
+      sourceNote: "後續對話 · 12:51",
+      tags: ["義大利麵", "燉飯", "開元路", "巷弄小店"]
     }
   ],
   pending: [
@@ -204,6 +294,8 @@ window.FOOD_MAP_DATA = {
     { name: "梁社漢排骨", reason: "連鎖店且未指定分店；群友個人口味是吃過一次後不再去。" },
     { name: "長榮路牛 A", reason: "只說店內白飯吃到飽，店名線索不足。" },
     { name: "大埔／大山鐵板燒", aliases: ["大埔鐵板燒", "大山鐵板燒"], reason: "作為價格比較被提到，未指定分店。" },
-    { name: "陽春麵那家", reason: "只說明亮乾淨，沒有店名或地址。" }
+    { name: "陽春麵那家", aliases: ["光明陽春麵"], reason: "後續對話已確認為光明陽春麵；保留原始線索供稽核。" },
+    { name: "麥味登", reason: "後續對話提到作為早餐店選項，但未指定分店。" },
+    { name: "拉亞漢堡", reason: "後續對話提到作為早餐店選項，但未指定分店。" }
   ]
 };
