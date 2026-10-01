@@ -304,8 +304,8 @@
     form.elements.googleMapsUrl.required = Boolean(pending);
     dialog.querySelector("h2").textContent = pending ? "補充待確認店家" : "推薦新的店家";
     dialog.querySelector(".dialog-note").textContent = pending
-      ? "請貼上確切店家或分店的 Google Maps 網址；送出後由管理者確認，核准上圖時這筆會自動移除。"
-      : "送出後會先進入待審核清單；管理者確認店名與位置後才會顯示在地圖上。";
+      ? "請貼上確切店家或分店的 Google Maps 網址；系統會自動解析位置，管理者核准上圖時這筆會自動移除。"
+      : "貼上 Google Maps 網址後，系統會自動解析地址與座標；管理者確認內容後才會顯示在地圖上。";
     document.querySelector("#suggest-status").textContent = "";
     dialog.showModal();
     setTimeout(() => (pending ? form.elements.googleMapsUrl : form.elements.name).focus(), 0);
