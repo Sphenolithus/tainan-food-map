@@ -23,7 +23,7 @@
 - `Suggestions`：群友新增的店家，預設為 `pending`。
 - `Settings`：欄位版本與審核原則。
 
-審核新增店家時，請在 `Suggestions` 補上 `address`、`lat`、`lng`，確認 Google Maps 網址與內容後，把 `status` 改成 `approved`。網站下次載入時就會出現；不採用的紀錄可改成 `hidden` 或 `rejected`，不必刪除。
+群友貼上 Google Maps 網址送出店家時，Apps Script 會自動解析 `address`、`lat`、`lng`。管理者確認網址、位置與內容後，把 `Suggestions.status` 改成 `approved`，網站下次載入時就會出現；不採用的紀錄可改成 `hidden` 或 `rejected`，不必刪除。若 `moderation_note` 顯示解析失敗，再人工補位置即可。
 
 網站「待確認店家」中的「補充位置」會將原始線索與待確認店名一併送入 `Suggestions`。核准後，網站會依這段來源標記或正式店名自動隱藏相對應的待確認項目，不必另外刪除原始紀錄。
 

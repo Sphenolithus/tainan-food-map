@@ -75,10 +75,96 @@ function saveSuggestion_(body) {
   const name = required_(body.name, "請填寫店名", 80);
   const reason = required_(body.reason, "請填寫推薦原因", 300);
   const url = clean_(body.googleMapsUrl, 500);
-  if (url && !/^https:\/\/(www\.)?(google\.[^/]+\/maps|maps\.app\.goo\.gl)\//i.test(url)) throw new Error("請貼上 Google Maps 網址");
+  if (url && !isGoogleMapsUrl_(url)) throw new Error("請貼上 Google Maps 網址");
+  const location = url ? googleMapsLocation_(url) : { address: "", lat: "", lng: "" };
+  const located = finite_(location.lat) && finite_(location.lng);
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName("Suggestions");
-  sheet.appendRow([Utilities.getUuid(), "pending", name, url, clean_(body.category, 40), reason, displayName, "", "", "", new Date(), ""]);
-  return { ok: true, message: "推薦已送出，待管理者確認位置" };
+  sheet.appendRow([
+    Utilities.getUuid(), "pending", name, url, clean_(body.category, 40), reason, displayName,
+    location.address || "", located ? location.lat : "", located ? location.lng : "", new Date(),
+    located ? "位置由 Google Maps 網址自動解析" : (url ? "自動解析位置失敗，核准前請確認地址與座標" : "未提供 Google Maps 網址")
+  ]);
+  return {
+    ok: true,
+    message: located ? "推薦已送出，位置已自動解析，待管理者確認" : "推薦已送出，但位置無法自動解析，請管理者確認"
+  };
+}
+
+function googleMapsLocation_(url) {
+  let resolved = String(url || "");
+  try {
+    for (let i = 0; i < 8; i++) {
+      if (!isGoogleMapsUrl_(resolved)) break;
+      const response = UrlFetchApp.fetch(resolved, {
+        followRedirects: false,
+        muteHttpExceptions: true,
+        headers: { "User-Agent": "Mozilla/5.0" }
+      });
+      const code = response.getResponseCode();
+      const headers = response.getAllHeaders();
+      const location = headers.Location || headers.location;
+      if (![301, 302, 303, 307, 308].includes(code) || !location) break;
+      resolved = absoluteUrl_(String(location), resolved);
+    }
+  } catch (_) {}
+
+  let match = resolved.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/i);
+  if (!match) match = resolved.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/i);
+  if (match) {
+    const lat = Number(match[1]);
+    const lng = Number(match[2]);
+    return { address: reverseGeocode_(lat, lng), lat, lng };
+  }
+
+  const queryMatch = resolved.match(/[?&](?:query|q)=([^&#]+)/i);
+  if (queryMatch) {
+    try {
+      const query = decodeURIComponent(queryMatch[1].replace(/\+/g, "%20"));
+      const geocoded = Maps.newGeocoder().setLanguage("zh-TW").setRegion("tw").geocode(query);
+      const result = geocoded && geocoded.results && geocoded.results[0];
+      if (result && result.geometry && result.geometry.location) {
+        return {
+          address: cleanAddress_(result.formatted_address),
+          lat: Number(result.geometry.location.lat),
+          lng: Number(result.geometry.location.lng)
+        };
+      }
+    } catch (_) {}
+  }
+  return { address: "", lat: "", lng: "" };
+}
+
+function reverseGeocode_(lat, lng) {
+  try {
+    const geocoded = Maps.newGeocoder().setLanguage("zh-TW").reverseGeocode(lat, lng);
+    const result = geocoded && geocoded.results && geocoded.results[0];
+    return result ? cleanAddress_(result.formatted_address) : "";
+  } catch (_) {
+    return "";
+  }
+}
+
+function cleanAddress_(value) {
+  return String(value || "").replace(/^台灣(?:省)?\s*/, "").trim();
+}
+
+function isGoogleMapsUrl_(value) {
+  const match = String(value || "").match(/^https:\/\/([^/?#]+)(?:[/?#]|$)/i);
+  if (!match) return false;
+  const host = match[1].toLowerCase().split(":")[0];
+  return host === "maps.app.goo.gl" ||
+    host === "google.com" ||
+    host.endsWith(".google.com") ||
+    /^(?:[a-z0-9-]+\.)?google\.[a-z]{2,3}(?:\.[a-z]{2})?$/.test(host);
+}
+
+function absoluteUrl_(location, base) {
+  if (/^https?:\/\//i.test(location)) return location;
+  const origin = String(base).match(/^https?:\/\/[^/]+/i);
+  if (!origin) return location;
+  if (location.startsWith("//")) return "https:" + location;
+  if (location.startsWith("/")) return origin[0] + location;
+  return origin[0] + "/" + location;
 }
 
 function publicPlaceIds_() {
